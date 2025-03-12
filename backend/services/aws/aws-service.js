@@ -1,5 +1,6 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { Readable } from "stream";
+import * as dotenv from 'dotenv'; 
+dotenv.config();
 
 class S3Service {
     constructor() {
@@ -12,7 +13,7 @@ class S3Service {
         });
     }
 
-    async getFile(bucketName, key) {
+    getFileFromS3 = async (bucketName, key) =>{
         const params = { Bucket: bucketName, Key: key };
         try {
             const response = await this.s3.send(new GetObjectCommand(params));
@@ -22,6 +23,20 @@ class S3Service {
             throw error;
         }
     }
+
+     isFileExistsInS3 = async (bucketName, key) => {
+        const params = { Bucket: bucketName, Key: key };
+        try {
+            await this.s3.send(new HeadObjectCommand(params));
+            return true;
+        } catch (error) {
+            if (error.name === "NotFound") {
+                return false; 
+            }
+            console.error("Error checking file existence in S3:", error);
+            throw error;
+        }
+     }
 }
 
 export default new S3Service();
