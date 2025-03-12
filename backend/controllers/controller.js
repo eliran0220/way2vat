@@ -17,6 +17,14 @@ class Controller {
             res.status(500).json(err)
         }
     }
+
+    getExpenseById = async (req, res) => {
+        try {
+            const result = await this.service.getExpenseById(req.params.id)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
 }
 
 export default new Controller();

@@ -96,6 +96,11 @@ class ExpenseWorker {
 
     saveExpensesBatch = async (batch) => {
         await Expense.insertMany(batch);
+
+        for (const expense of batch) {
+            const cacheKey = `expense:${expense.id}`;
+            await redisConnection.set(cacheKey, JSON.stringify(expense), "EX", 3600);
+        }
     };
 }
 
