@@ -7,7 +7,15 @@ class Controller {
 
 
     processFile = async (req,res) => {
-        const result = await this.service.processFile();
+        try {
+            const result = await this.service.processFile();
+            
+            if (result) {
+                return res.status(200).json(result)
+            } 
+        } catch (err) {
+            res.status(500).json(err)
+        }
     }
 }
 

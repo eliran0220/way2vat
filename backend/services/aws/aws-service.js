@@ -1,4 +1,4 @@
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand,HeadObjectCommand } from "@aws-sdk/client-s3";
 import * as dotenv from 'dotenv'; 
 dotenv.config();
 

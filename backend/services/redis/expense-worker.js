@@ -1,18 +1,21 @@
-import { expenseQueue } from "./redis-queue.js";
+import { expenseQueue } from "./redis-queue.js"; 
 import S3Service from "../aws/aws-service.js";
 import Expense from "../../database/models/expense.js";
 import companiesConfig from "../../config/companies_config.json" with { type: "json" };
 
 class ExpenseWorker {
-    constructor(redisConnection) {
+    constructor() {
         this.configuredCompanies = new Set(companiesConfig.configuredCompanies);
         this.batch = [];
         this.batchSize = 20;
         this.reportUpdates = new Map();
         this.summary = { Completed: 0, Failed: 0, Excluded: 0, totalReports: 0 };
         this.reportsSet = new Set(); 
+        this.saveTimeout = null;
 
-        expenseQueue.processJobs((job, done) => this.processExpense(job, done));
+        expenseQueue.processJobs(this.processExpense.bind(this));
+
+        this.startPeriodicSave();
     }
 
     processExpense = async (job, done) => {
@@ -37,11 +40,23 @@ class ExpenseWorker {
                 this.batch = [];
             }
 
+            
             done();
         } catch (error) {
             console.error("Error processing expense:", error);
             done(error);
         }
+    };
+
+    startPeriodicSave = () => {
+        this.saveTimeout = setInterval(async () => {
+            if (this.batch.length > 0) {
+                console.log("saving size....",this.batch.length)
+                await this.saveExpensesBatch(this.batch);
+                console.log("saved!!")
+                this.batch = [];
+            }
+        }, 5000);
     };
 
     classifyExpenseToCategory = async (expense) => {
