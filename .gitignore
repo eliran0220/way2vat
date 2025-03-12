@@ -1,0 +1,27 @@
+# Environment variables
+.env
+
+# Node.js dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+debug.log
+
+# Build artifacts
+dist/
+out/
+coverage/
+
+# Docker-specific (optional, uncomment if needed)
+# docker-compose.override.yml
+
+# IDE/editor-specific files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

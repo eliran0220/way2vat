@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: node_backend
+    restart: always
+    ports:
+      - "3000:3000"
+      - "9229:9229"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+    command: npm run dev
+    
+
+volumes:
+  mongo_data:
