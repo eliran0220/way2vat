@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import router from './routes/router.js';
 import connectDB from './config/db.js'; 
+import './services/redis/expense-worker.js';
 
 dotenv.config();
 
@@ -14,7 +15,6 @@ class Server {
 
     async init() {
         try {
-
             await connectDB();
             console.log('Database connected. Starting server...');
             
