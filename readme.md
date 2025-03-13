@@ -6,3 +6,4 @@ Things to imporve:
 3. Better database structure and indexing, right now only indexing the main index (\_id), and indexing the report on reportId, companyId.
 4. Typescript project
 5. Periodic save of batches could be optimized
+6. used my aws access and private key in an env file, I can provide some screenshot examples if you'd like for the api calls...
