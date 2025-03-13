@@ -31,6 +31,7 @@ class Service {
               await expenseQueue.addJob(formattedExpense, {
                 removeOnComplete: true,
               });
+
               console.log("Job added successfully:", formattedExpense);
             } catch (err) {
               console.error("Failed to add job:", err);

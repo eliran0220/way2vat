@@ -5,7 +5,6 @@ import connectDB from "./src/config/db-config.js";
 import SocketService from "./src/services/io_socket/io_socket.js";
 import ExpenseWorker from "./src/services/redis/redis-expense-worker.js";
 import http from "http";
-import pino from "pino";
 
 dotenv.config();
 
@@ -17,44 +16,36 @@ class Server {
     this.socketService = null;
     this.expenseWorker = null;
 
-    this.logger = pino({
-      level: process.env.LOG_LEVEL || "info",
-      transport: {
-        target: "pino-pretty",
-        options: { colorize: true },
-      },
-    });
-
     this.initMiddlewares();
     this.initRoutes();
   }
 
-  initMiddlewares() {
+  initMiddlewares = () => {
     this.app.use(express.json());
-    this.logger.info("Middlewares initialized.");
-  }
+    console.log("Middlewares initialized.");
+  };
 
-  initRoutes() {
+  initRoutes = () => {
     this.app.use("/api", router);
-    this.logger.info("Routes initialized.");
-  }
+    console.log("Routes initialized.");
+  };
 
-  async start() {
+  start = async () => {
     try {
       await connectDB();
-      this.logger.info("Database connected. Starting server...");
+      console.log("Database connected. Starting server...");
 
       this.socketService = new SocketService(this.server);
       this.expenseWorker = new ExpenseWorker(this.socketService);
 
       this.server.listen(this.port, () => {
-        this.logger.info(`Server running on port ${this.port}`);
+        console.log(`Server running on port ${this.port}`);
       });
     } catch (error) {
-      this.logger.error({ msg: "Error starting the server", error });
+      tconsole.log({ msg: "Error starting the server", error });
       process.exit(1);
     }
-  }
+  };
 }
 
 const server = new Server();

@@ -6,14 +6,14 @@ class ConversionRouter {
     this.initRoutes();
   }
 
-  initRoutes() {
+  initRoutes = () => {
     this.router.post("/processFile", controller.processFile);
     this.router.get("/getExpense/:id", controller.getExpenseById);
-  }
+  };
 
-  getRouter() {
+  getRouter = () => {
     return this.router;
-  }
+  };
 }
 
 export default new ConversionRouter().getRouter();
