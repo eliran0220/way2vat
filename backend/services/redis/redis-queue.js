@@ -1,22 +1,25 @@
 import Queue from "bull";
-import redisConnection from "./redis-connection.js";
+
 
 class RedisQueue {
     constructor(queueName, options = {}) {
         this.queue = new Queue(queueName, {
-            connection: redisConnection,
+            redis: {
+                host: process.env.REDIS_HOST || "redis",
+                port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : 6379,
+            },
             ...options,
         });
 
-        this.queue.on("error", (err) => console.error(`❌ Queue error in ${queueName}:`, err));
+        this.queue.on("error", (err) => console.error(`Queue error in ${queueName}:`, err));
     }
 
     addJob(jobData, options = {}) {
         return this.queue.add(jobData, options);
     }
 
-    processJobs(processFunction) {
-        this.queue.process(processFunction);
+    processJobs(concurrency, processFunction) {
+        this.queue.process(concurrency, processFunction);
     }
 
     async closeQueue() {
@@ -27,3 +30,4 @@ class RedisQueue {
 export const expenseQueue = new RedisQueue("expenseQueue");
 
 export default RedisQueue;
+

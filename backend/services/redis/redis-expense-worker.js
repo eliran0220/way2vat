@@ -1,7 +1,7 @@
 import { expenseQueue } from "./redis-queue.js"; 
 import S3Service from "../aws/aws-service.js";
 import Expense from "../../database/models/expense.js";
-import companiesConfig from "../../config/companies-config.json" with { type: "json" };
+import companiesConfig from "../../config/companies-config.json" assert { type: "json" };
 import redisConnection from "./redis-connection.js";
 import ExpenseSummary from '../../database/models/summary.js';
 
@@ -16,7 +16,7 @@ class ExpenseWorker {
         this.saveTimeout = null;
         this.socketService = socketService;
 
-        expenseQueue.processJobs(this.processExpense.bind(this));
+        expenseQueue.processJobs(10, this.processExpense.bind(this));
 
         this.startPeriodicSave();
     }
