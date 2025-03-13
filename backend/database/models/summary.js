@@ -5,7 +5,7 @@ const ExpenseSummarySchema = new mongoose.Schema({
   completedCount: { type: Number, default: 0 },
   failedCount: { type: Number, default: 0 },
   excludedCount: { type: Number, default: 0 },
-  lastUpdated: { type: Date, default: Date.now }
+  lastUpdated: { type: Date, default: Date.now },
 });
 
 export default mongoose.model("ExpenseSummaryReport", ExpenseSummarySchema);

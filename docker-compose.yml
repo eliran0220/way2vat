@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   backend:
@@ -13,7 +13,18 @@ services:
     volumes:
       - ./backend:/app
     command: npm run dev
-    
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
 volumes:
   mongo_data:
+  redis_data:
