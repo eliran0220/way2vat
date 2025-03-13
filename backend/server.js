@@ -24,29 +24,29 @@ class Server {
             await connectDB();
             console.log('Database connected. Starting server...');
             
-            this.middlewares();
-            this.routes();
+            this.initMiddlewares();
+            this.initRoutes();
 
             this.socketService = new SocketService(this.server);
 
             this.expenseWorker = new ExpenseWorker(this.socketService);
             
-            this.start();
+            this.startServer();
         } catch (error) {
             console.error('Error connecting to MongoDB:', error);
             process.exit(1);
         }
     }
 
-    middlewares() {
+    initMiddlewares() {
         this.app.use(express.json());
     }
 
-    routes() {
+    initRoutes() {
         this.app.use('/api', router);
     }
 
-    start() {
+    startServer() {
         this.app.listen(this.port, () => {
             console.log(`Server running on port ${this.port}`);
         });
