@@ -19,7 +19,7 @@ services:
     volumes:
       - .:/usr/src/app
     environment:
-      MONGO_URI: "mongodb+srv://eliran0220:9GSWgaJIjgV3GgMk@cluster0.nlfgy.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0"
+      MONGO_URI: "mongodb+srv://eliran0220:hereisthepassword@cluster0.nlfgy.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0"
       REDIS_HOST: redis
       REDIS_PORT: 6379
     depends_on:
