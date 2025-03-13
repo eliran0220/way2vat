@@ -51,17 +51,20 @@ class ExpenseWorker {
       done(error);
     }
   };
-
   startPeriodicSave = () => {
     this.saveTimeout = setInterval(async () => {
-      if (this.batch.length > 0) {
-        console.log("Saving batch size:", this.batch.length);
-        await this.saveExpensesBatch(this.batch);
-        console.log("Batch saved!");
+      try {
+        if (this.batch.length > 0) {
+          console.log("Saving batch size:", this.batch.length);
+          await this.saveExpensesBatch(this.batch);
+          console.log("Batch saved!");
 
-        await this.updateExpenseSummary();
+          await this.updateExpenseSummary();
 
-        this.batch = [];
+          this.batch = [];
+        }
+      } catch (error) {
+        console.error("Error in periodic save:", error);
       }
     }, 5000);
   };
@@ -100,31 +103,41 @@ class ExpenseWorker {
   };
 
   classifyExpenseToCategory = async (expense) => {
-    let category = null;
-    const { company, reportId, amount, imageUrl } = expense;
+    try {
+      let category = null;
+      const { company, reportId, amount, imageUrl } = expense;
 
-    if (!this.configuredCompanies.has(company)) {
-      category = "Excluded";
-      this.summary.Excluded += 1;
-    } else if (!(await this.isValidExpense(amount, imageUrl))) {
-      category = "Failed";
-      this.summary.Failed += 1;
-    } else {
-      category = "Completed";
+      if (!this.configuredCompanies.has(company)) {
+        category = "Excluded";
+        this.summary.Excluded += 1;
+      } else if (!(await this.isValidExpense(amount, imageUrl))) {
+        category = "Failed";
+        this.summary.Failed += 1;
+      } else {
+        category = "Completed";
+      }
+
+      return { category, company, reportId, amount: parseFloat(amount) };
+    } catch (error) {
+      console.error("Error classifying expense:", error);
+      return { category: "Failed", company: null, reportId: null, amount: 0 };
     }
-
-    return { category, company, reportId, amount: parseFloat(amount) };
   };
 
   isValidExpense = async (amount, imageUrl) => {
-    const parsedAmount = parseFloat(amount);
-    if (!parsedAmount || parsedAmount === 0) return false;
+    try {
+      const parsedAmount = parseFloat(amount);
+      if (!parsedAmount || parsedAmount === 0) return false;
 
-    const imageExists = await S3Service.isFileExistsInS3(
-      process.env.AWS_BUCKET_IMAGES,
-      imageUrl
-    );
-    return !!imageExists;
+      const imageExists = await S3Service.isFileExistsInS3(
+        process.env.AWS_BUCKET_IMAGES,
+        imageUrl
+      );
+      return !!imageExists;
+    } catch (error) {
+      console.error("Error validating expense:", error);
+      return false;
+    }
   };
 
   updateReport = (reportUpdates, company, reportId, amount) => {
@@ -145,11 +158,20 @@ class ExpenseWorker {
   };
 
   saveExpensesBatch = async (batch) => {
-    await Expense.insertMany(batch);
+    try {
+      await Expense.insertMany(batch);
 
-    for (const expense of batch) {
-      const cacheKey = `expense:${expense.id}`;
-      await redisConnection.set(cacheKey, JSON.stringify(expense), "EX", 3600);
+      for (const expense of batch) {
+        const cacheKey = `expense:${expense.id}`;
+        await redisConnection.set(
+          cacheKey,
+          JSON.stringify(expense),
+          "EX",
+          3600
+        );
+      }
+    } catch (error) {
+      console.error("Error saving expense batch:", error);
     }
   };
 }

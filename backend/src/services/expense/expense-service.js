@@ -7,37 +7,51 @@ import mongoose from "mongoose";
 
 class Service {
   processFile = async () => {
-    const fileStream = await S3Service.getFileFromS3(
-      process.env.AWS_BUCKET_CSV,
-      "expenses_new.csv"
-    );
-
-    fileStream
-      .pipe(csv({ mapHeaders: ({ header }) => header.trim() }))
-      .on("data", (expense) => {
-        const formattedExpense = {
-          company: expense.Company,
-          reportId: expense.ReportId,
-          amount: expense.Amount,
-          imageUrl: expense.ImageUrl,
-          status: expense.Status,
-        };
-
-        console.log("Formatted job data:", formattedExpense);
-
-        expenseQueue
-          .addJob(formattedExpense, { removeOnComplete: true })
-          .then(() => console.log("Job added successfully:", formattedExpense))
-          .catch((err) => console.error("Failed to add job:", err));
-      })
-      .on("error", (error) => console.error("Stream error:", error))
-      .on("end", () =>
-        console.log("File streaming completed, jobs added to queue.")
+    try {
+      const fileStream = await S3Service.getFileFromS3(
+        process.env.AWS_BUCKET_CSV,
+        "expenses_new.csv"
       );
 
-    return {
-      message: "File processing started, jobs will be added asynchronously.",
-    };
+      return new Promise((resolve, reject) => {
+        fileStream
+          .pipe(csv({ mapHeaders: ({ header }) => header.trim() }))
+          .on("data", async (expense) => {
+            try {
+              const formattedExpense = {
+                company: expense.Company,
+                reportId: expense.ReportId,
+                amount: expense.Amount,
+                imageUrl: expense.ImageUrl,
+                status: expense.Status,
+              };
+
+              console.log("Formatted job data:", formattedExpense);
+
+              await expenseQueue.addJob(formattedExpense, {
+                removeOnComplete: true,
+              });
+              console.log("Job added successfully:", formattedExpense);
+            } catch (err) {
+              console.error("Failed to add job:", err);
+            }
+          })
+          .on("error", (error) => {
+            console.error("Stream error:", error);
+            reject(error);
+          })
+          .on("end", () => {
+            console.log("File streaming completed, jobs added to queue.");
+            resolve({
+              message:
+                "File processing started, jobs will be added asynchronously.",
+            });
+          });
+      });
+    } catch (error) {
+      console.error("Error processing file:", error);
+      throw new Error("Failed to process file");
+    }
   };
 
   getExpenseById = async (expenseId) => {
@@ -47,12 +61,14 @@ class Service {
       const cachedExpense = await redisConnection.get(cacheKey);
       if (cachedExpense) {
         console.log("Found in cache!");
-        const parsedExpense = JSON.parse(cachedExpense);
-        return parsedExpense;
+        return JSON.parse(cachedExpense);
       }
 
-      const _id = mongoose.Types.ObjectId.createFromHexString(expenseId);
+      if (!mongoose.Types.ObjectId.isValid(expenseId)) {
+        throw new Error("Invalid expense ID format");
+      }
 
+      const _id = new mongoose.Types.ObjectId(expenseId);
       const expense = await Expense.findById(_id);
 
       if (!expense) {
