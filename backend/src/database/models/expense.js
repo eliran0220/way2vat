@@ -13,6 +13,5 @@ const ExpenseSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-ExpenseSchema.index({ reportId: 1 });
 
 export default mongoose.model("Expense", ExpenseSchema);
