@@ -1,8 +1,8 @@
-import { expenseQueue } from "./redis/redis-queue.js";
-import S3Service from "./aws/aws-service.js";
+import { expenseQueue } from "../redis/redis-queue.js";
+import S3Service from "../aws/aws-service.js";
 import csv from "csv-parser";
-import redisConnection from "./redis/redis-connection.js";
-import Expense from "../database/models/expense.js";
+import redisConnection from "../redis/redis-connection.js";
+import Expense from "../../database/models/expense.js";
 import mongoose from "mongoose";
 
 class Service {

@@ -1,4 +1,4 @@
-import service from '../services/service.js'
+import service from '../../services/expense/expense-service.js'
 
 class Controller {
     constructor() {

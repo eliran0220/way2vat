@@ -1,9 +1,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import router from './routes/router.js';
-import connectDB from './config/db.js'; 
-import SocketService from "./services/io_socket.js";
-import ExpenseWorker from "./services/redis/expense-worker.js";
+import router from './routes/expense-router.js';
+import connectDB from './config/db-config.js'; 
+import SocketService from "./services/io_socket/io_socket.js";
+import ExpenseWorker from "./services/redis/redis-expense-worker.js";
 import http from "http";
 
 dotenv.config();

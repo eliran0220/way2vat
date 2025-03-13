@@ -1,6 +1,6 @@
 
 import express from 'express';
-import controller from '../controllers/controller.js';
+import controller from '../controllers/expense/expense-controller.js';
 class ConversionRouter {
     constructor(){
         this.router = express.Router()

@@ -1,10 +1,9 @@
 import { expenseQueue } from "./redis-queue.js"; 
 import S3Service from "../aws/aws-service.js";
 import Expense from "../../database/models/expense.js";
-import companiesConfig from "../../config/companies_config.json" with { type: "json" };
+import companiesConfig from "../../config/companies-config.json" with { type: "json" };
 import redisConnection from "./redis-connection.js";
 import ExpenseSummary from '../../database/models/summary.js';
-import SocketService from "../io_socket.js"
 
 class ExpenseWorker {
     constructor(socketService) {
