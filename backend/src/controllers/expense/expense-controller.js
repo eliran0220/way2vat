@@ -29,6 +29,19 @@ class Controller {
       res.status(500).json(err);
     }
   };
+
+  getSummary = async (req, res) => {
+    try {
+      const result = await this.service.getSummary();
+      if (result) {
+        return res.status(200).json(result);
+      } else {
+        return res.status(200).json("No summary found, please check a bit later");
+      }
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  };
 }
 
 export default new Controller();

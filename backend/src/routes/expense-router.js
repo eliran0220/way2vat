@@ -9,6 +9,7 @@ class ConversionRouter {
   initRoutes = () => {
     this.router.post("/processFile", controller.processFile);
     this.router.get("/getExpense/:id", controller.getExpenseById);
+    this.router.get("/getSummary", controller.getSummary);
   };
 
   getRouter = () => {
