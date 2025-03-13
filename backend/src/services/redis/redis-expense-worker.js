@@ -49,6 +49,7 @@ class ExpenseWorker {
       done(error);
     }
   };
+  
   startPeriodicSave = () => {
     this.saveTimeout = setInterval(async () => {
       try {

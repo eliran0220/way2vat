@@ -17,17 +17,22 @@ class RedisQueue {
     );
   }
 
-  addJob(jobData, options = {}) {
-    return this.queue.add(jobData, options);
-  }
+  addJob = async (jobData, options = {}) => {
+    try {
+      return await this.queue.add(jobData, options);
+    } catch (error) {
+      console.error("Failed to add job to queue:", error);
+      throw error;
+    }
+  };
 
-  processJobs(concurrency, processFunction) {
+  processJobs = (concurrency, processFunction) => {
     this.queue.process(concurrency, processFunction);
-  }
+  };
 
-  async closeQueue() {
+  closeQueue = async () => {
     await this.queue.close();
-  }
+  };
 }
 
 export const expenseQueue = new RedisQueue("expenseQueue");
