@@ -34,5 +34,5 @@ volumes:
   redis_data:
 
 networks:
-  app_network: # Define a custom network for inter-service communication
+  app_network:
     driver: bridge
