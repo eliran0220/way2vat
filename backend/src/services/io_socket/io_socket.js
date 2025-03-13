@@ -6,7 +6,7 @@ class SocketService {
     this.io = new Server(server, { cors: { origin: "*" } });
 
     this.io.on("connection", async (socket) => {
-      console.log("⚡ Client connected to WebSocket");
+      console.log("Client connected to WebSocket");
 
       await this.sendLatestSummary(socket);
 
@@ -21,13 +21,13 @@ class SocketService {
       const summary = await service.getSummary();
       socket.emit("summaryUpdate", summary);
     } catch (error) {
-      console.error("❌ Error sending summary update:", error);
+      console.error("Error sending summary update:", error);
     }
   }
 
   emitSummaryUpdate(summaryData) {
     this.io.emit("summaryUpdate", summaryData);
-    console.log("📡 Summary update emitted to all clients:", summaryData);
+    console.log("Summary update emitted to all clients:", summaryData);
   }
 }
 
