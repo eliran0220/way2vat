@@ -15,7 +15,7 @@ class ExpenseWorker {
     this.saveTimeout = null;
     this.socketService = socketService;
 
-    expenseQueue.processJobs(10, this.processExpense.bind(this));
+    expenseQueue.processJobs(10, this.processExpense);
 
     this.startPeriodicSave();
   }
