@@ -21,6 +21,10 @@ class Controller {
     getExpenseById = async (req, res) => {
         try {
             const result = await this.service.getExpenseById(req.params.id)
+
+             if (result) {
+                return res.status(200).json(result)
+            } 
         } catch (err) {
             res.status(500).json(err)
         }

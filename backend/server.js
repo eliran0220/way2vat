@@ -2,7 +2,9 @@ import express from 'express';
 import dotenv from 'dotenv';
 import router from './routes/router.js';
 import connectDB from './config/db.js'; 
-import './services/redis/expense-worker.js';
+import SocketService from "./services/io_socket.js";
+import ExpenseWorker from "./services/redis/expense-worker.js";
+import http from "http";
 
 dotenv.config();
 
@@ -10,6 +12,10 @@ class Server {
     constructor() {
         this.app = express();
         this.port = process.env.PORT || 3000;
+        this.server = http.createServer(this.app); 
+        this.socketService = null;
+        this.expenseWorker = null;
+
         this.init();
     }
 
@@ -20,6 +26,11 @@ class Server {
             
             this.middlewares();
             this.routes();
+
+            this.socketService = new SocketService(this.server);
+
+            this.expenseWorker = new ExpenseWorker(this.socketService);
+            
             this.start();
         } catch (error) {
             console.error('Error connecting to MongoDB:', error);

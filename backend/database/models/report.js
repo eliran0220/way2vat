@@ -9,7 +9,6 @@ const ReportSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-// Index for fast retrieval
 ReportSchema.index({ company: 1, reportId: 1 });
 
 export default mongoose.model('Report', ReportSchema);

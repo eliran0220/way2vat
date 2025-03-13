@@ -2,9 +2,12 @@ import { expenseQueue } from "./redis-queue.js";
 import S3Service from "../aws/aws-service.js";
 import Expense from "../../database/models/expense.js";
 import companiesConfig from "../../config/companies_config.json" with { type: "json" };
+import redisConnection from "./redis-connection.js";
+import ExpenseSummary from '../../database/models/summary.js';
+import SocketService from "../io_socket.js"
 
 class ExpenseWorker {
-    constructor() {
+    constructor(socketService) {
         this.configuredCompanies = new Set(companiesConfig.configuredCompanies);
         this.batch = [];
         this.batchSize = 20;
@@ -12,6 +15,7 @@ class ExpenseWorker {
         this.summary = { Completed: 0, Failed: 0, Excluded: 0, totalReports: 0 };
         this.reportsSet = new Set(); 
         this.saveTimeout = null;
+        this.socketService = socketService;
 
         expenseQueue.processJobs(this.processExpense.bind(this));
 
@@ -33,6 +37,7 @@ class ExpenseWorker {
 
             if (category === "Completed") {
                 this.updateReport(reportUpdates,company, reportId, amount);
+                this.summary.Completed +=1;
             }
 
             if (this.batch.length >= this.batchSize) {
@@ -51,12 +56,40 @@ class ExpenseWorker {
     startPeriodicSave = () => {
         this.saveTimeout = setInterval(async () => {
             if (this.batch.length > 0) {
-                console.log("saving size....",this.batch.length)
+                console.log("Saving batch size:", this.batch.length);
                 await this.saveExpensesBatch(this.batch);
-                console.log("saved!!")
+                console.log("Batch saved!");
+
+                await this.updateExpenseSummary();
+
                 this.batch = [];
             }
         }, 5000);
+    };
+
+    updateExpenseSummary = async () => {
+        try {
+            const totalReports = this.summary.totalReports;
+            const completedCount = this.summary.Completed;
+            const failedCount = this.summary.Failed;
+            const excludedCount = this.summary.Excluded;
+    
+            const summaryData = {
+                totalReports,
+                completedCount,
+                failedCount,
+                excludedCount,
+                lastUpdated: new Date()
+            };
+    
+            await ExpenseSummary.findOneAndUpdate({}, summaryData, { upsert: true, new: true });
+    
+            await redisConnection.set("summary:data", JSON.stringify(summaryData), "EX", 60);
+
+            this.socketService.emitSummaryUpdate(summaryData);
+        } catch (error) {
+            console.error("Error updating summary:", error);
+        }
     };
 
     classifyExpenseToCategory = async (expense) => {
@@ -65,8 +98,10 @@ class ExpenseWorker {
 
         if (!this.configuredCompanies.has(company)) {
             category = "Excluded";
+            this.summary.Excluded +=1;
         } else if (!(await this.isValidExpense(amount, imageUrl))) {
             category = "Failed";
+            this.summary.Failed +=1;
         } else {
             category = "Completed";
         }
@@ -104,4 +139,4 @@ class ExpenseWorker {
     };
 }
 
-export default new ExpenseWorker();
+export default ExpenseWorker;
