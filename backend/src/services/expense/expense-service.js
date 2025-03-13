@@ -4,6 +4,7 @@ import csv from "csv-parser";
 import redisConnection from "../redis/redis-connection.js";
 import Expense from "../../database/models/expense.js";
 import mongoose from "mongoose";
+import ExpenseSummary from "../../database/models/summary.js";
 
 class Service {
   processFile = async () => {
@@ -70,7 +71,7 @@ class Service {
       }
 
       const _id = new mongoose.Types.ObjectId(expenseId);
-      const expense = await Expense.findById(_id);
+      const expense = await Expense.findById(_id).lean;
 
       if (!expense) {
         return null;
