@@ -10,7 +10,6 @@ class ExpenseWorker {
     this.configuredCompanies = new Set(companiesConfig.configuredCompanies);
     this.batch = [];
     this.batchSize = 20;
-    this.reportUpdates = new Map();
     this.summary = { Completed: 0, Failed: 0, Excluded: 0, totalReports: 0 };
     this.reportsSet = new Set();
     this.saveTimeout = null;
@@ -36,7 +35,6 @@ class ExpenseWorker {
       }
 
       if (category === "Completed") {
-        this.updateReport(reportUpdates, company, reportId, amount);
         this.summary.Completed += 1;
       }
 
@@ -138,23 +136,6 @@ class ExpenseWorker {
       console.error("Error validating expense:", error);
       return false;
     }
-  };
-
-  updateReport = (reportUpdates, company, reportId, amount) => {
-    const reportKey = `${company}-${reportId}`;
-
-    if (!reportUpdates.has(reportKey)) {
-      reportUpdates.set(reportKey, {
-        company,
-        reportId,
-        totalAmountCompleted: 0,
-        expenseCount: 0,
-      });
-    }
-
-    const report = reportUpdates.get(reportKey);
-    report.totalAmountCompleted += amount;
-    report.expenseCount += 1;
   };
 
   saveExpensesBatch = async (batch) => {
