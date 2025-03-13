@@ -7,3 +7,6 @@ Things to imporve:
 4. Typescript project
 5. Periodic save of batches could be optimized
 6. used my aws access and private key in an env file, I can provide some screenshot examples if you'd like for the api calls...
+7. I start the app by:
+   docker-compose down  
+   docker-compose up --build
